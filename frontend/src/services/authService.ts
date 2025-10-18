@@ -1,61 +1,21 @@
-import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8888";
-
-// Create axios instance with credentials for auth
-const authApi = axios.create({
-  baseURL: baseURL,
-  withCredentials: true,
-});
-
-// Add response interceptor for error handling
-authApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("Auth API Error:", error);
-    return Promise.reject(error);
-  }
-);
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  type User as FirebaseUser
+} from 'firebase/auth';
+import { auth, db } from '../lib/firebase'; // Import auth and db from your firebase.ts file
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: "USER" | "ADMIN";
+  role: 'USER' | 'ADMIN';
   mobile?: string;
 }
-
-export interface LoginResponse {
-  status: string;
-  message: string;
-  data: {
-    user: User;
-  };
-}
-
-// Admin Login
-export const adminLogin = async (
-  email: string,
-  password: string
-): Promise<LoginResponse> => {
-  const response = await authApi.post("/api/auth/admin/login", {
-    email,
-    password,
-  });
-  return response.data;
-};
-
-// Regular User Login
-export const userLogin = async (
-  email: string,
-  password: string
-): Promise<LoginResponse> => {
-  const response = await authApi.post("/api/auth/login", {
-    email,
-    password,
-  });
-  return response.data;
-};
 
 // User Registration
 export const userRegister = async (userData: {
@@ -63,24 +23,46 @@ export const userRegister = async (userData: {
   email: string;
   password: string;
   mobile?: string;
-}): Promise<LoginResponse> => {
-  const response = await authApi.post("/api/auth/register", userData);
-  return response.data;
+}) => {
+  const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+  const user = userCredential.user;
+
+  // Add user data to Firestore
+  await setDoc(doc(db, 'users', user.uid), {
+    name: userData.name,
+    email: userData.email,
+    role: 'USER', // Default role
+    mobile: userData.mobile,
+  });
+
+  return user;
+};
+
+// Regular User Login
+export const userLogin = async (email: string, password: string) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
 };
 
 // Logout
 export const logout = async (): Promise<void> => {
-  await authApi.post("/api/auth/logout");
+  await signOut(auth);
 };
 
 // Get Profile
-export const getProfile = async (): Promise<User> => {
-  const response = await authApi.get("/api/auth/profile");
-  return response.data.data.user;
+export const getProfile = async (): Promise<User | null> => {
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  if (userDoc.exists()) {
+    return { id: user.uid, ...userDoc.data() } as User;
+  }
+
+  return null;
 };
 
-// Refresh Token
-export const refreshToken = async (): Promise<LoginResponse> => {
-  const response = await authApi.post("/api/auth/refresh");
-  return response.data;
+// onAuthStateChanged wrapper
+export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => {
+  return onAuthStateChanged(auth, callback);
 };

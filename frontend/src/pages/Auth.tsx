@@ -8,7 +8,7 @@ import { Leaf, Lock, Mail, Loader2 } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { adminLogin } from '@/services/authService';
+import { userLogin, getProfile } from '@/services/authService';
 
 const Auth = () => {
   const { toast } = useToast();
@@ -34,34 +34,42 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const response = await adminLogin(loginForm.email, loginForm.password);
+      await userLogin(loginForm.email, loginForm.password);
+      const user = await getProfile();
 
-      const { user } = response.data;
+      if (user) {
+        toast({
+          title: "Login Successful!",
+          description: `Welcome back, ${user.name}!`,
+        });
 
-      // Store user info in localStorage
-      localStorage.setItem('user', JSON.stringify(user));
-
-      toast({
-        title: "Login Successful!",
-        description: `Welcome back, ${user.name}!`,
-      });
-
-      // Redirect based on role
-      if (user.role === 'ADMIN') {
-        navigate('/admin');
+        if (user.role === 'ADMIN') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       } else {
-        navigate('/');
+        throw new Error('Could not retrieve user profile.');
       }
 
     } catch (error: unknown) {
       console.error('Login error:', error);
       
-      const errorMessage = error instanceof Error && 'response' in error && 
-        typeof error.response === 'object' && error.response !== null &&
-        'data' in error.response && typeof error.response.data === 'object' &&
-        error.response.data !== null && 'message' in error.response.data
-        ? String(error.response.data.message)
-        : "Invalid credentials. Please try again.";
+      let errorMessage = "Invalid credentials. Please try again.";
+      if (error instanceof Error) {
+        switch ((error as any).code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            errorMessage = "Invalid email or password.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Please enter a valid email address.";
+            break;
+          default:
+            errorMessage = "An unexpected error occurred. Please try again.";
+            break;
+        }
+      }
         
       toast({
         title: "Login Failed",
