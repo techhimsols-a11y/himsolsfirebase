@@ -1,0 +1,89 @@
+# fly.toml app configuration file generated for eco-roots-bloom-backend-restless-silence-4727 on 2025-06-08T23:08:24+05:30
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "eco-roots-bloom-backend"
+primary_region = "sin"
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  strategy = "immediate"
+
+[env]
+  NODE_ENV = 'production'
+  PORT = "8080"
+  # Enable production logging
+  LOG_LEVEL = "info"
+  # Enable Morgan logging in production
+  MORGAN_LOG_LEVEL = "combined"
+
+[processes]
+  app = 'npm start'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = "300s"      # Check every 15 seconds
+    timeout = "15s"        # Wait 2 seconds for response
+    grace_period = "60s"   # 1 second grace period
+
+[checks]
+  [checks.alive]
+    type = 'tcp'
+    interval = '15s'
+    timeout = '2s'
+    grace_period = '5s'
+  
+  [checks.health]
+    type = 'http'
+    interval = '300s'
+    timeout = '50s'
+    grace_period = '80s'
+    method = 'GET'
+    path = '/api/status'
+    protocol = 'http'
+    tls_skip_verify = false
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024
+
+[[metrics]]
+  port = 8080
+  path = '/metrics'
+  protocol = 'http'
+  interval = "120s"       # Collect metrics every 2 minutes
+  timeout = "10s" 
+

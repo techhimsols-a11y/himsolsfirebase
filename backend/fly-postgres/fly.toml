@@ -1,0 +1,23 @@
+# fly.toml app configuration file for himsols-prod-db
+app = 'himsols-prod-db'
+primary_region = 'sin'
+
+[build]
+  image = 'postgres:15-alpine'
+
+[env]
+  POSTGRES_DB = "himsols_prod_db"
+  POSTGRES_USER = "postgres"
+  PGDATA = "/var/lib/postgresql/data/pgdata"  # Use subdirectory
+
+[[mounts]]
+  source = "pg_data"
+  destination = "/var/lib/postgresql/data"
+
+[processes]
+  app = "postgres"
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1

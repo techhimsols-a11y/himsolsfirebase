@@ -1,0 +1,122 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system with earthy, eco-friendly colors */
+
+@layer base {
+  :root {
+    --background: 45 20% 97%;
+    --foreground: 25 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 25 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 30% 15%;
+
+    --primary: 120 40% 25%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 35 25% 85%;
+    --secondary-foreground: 25 30% 15%;
+
+    --muted: 45 15% 92%;
+    --muted-foreground: 25 15% 45%;
+
+    --accent: 35 60% 70%;
+    --accent-foreground: 25 30% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 35 20% 85%;
+    --input: 35 20% 85%;
+    --ring: 120 40% 25%;
+
+    --radius: 0.5rem;
+
+    --earth-green: 120 40% 25%;
+    --earth-brown: 25 35% 35%;
+    --earth-beige: 35 25% 85%;
+    --earth-sage: 100 20% 60%;
+    --earth-cream: 45 50% 95%;
+  }
+
+  .dark {
+    --background: 25 30% 8%;
+    --foreground: 45 20% 95%;
+    --card: 25 30% 10%;
+    --card-foreground: 45 20% 95%;
+    --primary: 120 40% 40%;
+    --primary-foreground: 25 30% 8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+/* Custom utility classes for the eco theme */
+@layer utilities {
+  .bg-earth-green {
+    background-color: hsl(var(--earth-green));
+  }
+  
+  .bg-earth-brown {
+    background-color: hsl(var(--earth-brown));
+  }
+  
+  .bg-earth-beige {
+    background-color: hsl(var(--earth-beige));
+  }
+  
+  .bg-earth-sage {
+    background-color: hsl(var(--earth-sage));
+  }
+  
+  .bg-earth-cream {
+    background-color: hsl(var(--earth-cream));
+  }
+  
+  .text-earth-green {
+    color: hsl(var(--earth-green));
+  }
+  
+  .text-earth-brown {
+    color: hsl(var(--earth-brown));
+  }
+  
+  .border-earth-green {
+    border-color: hsl(var(--earth-green));
+  }
+}
+ .VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none;
+  }
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0px !important;
+}
+.goog-logo-link,
+.goog-te-gadget span {
+  display: none !important;
+}
+.goog-te-gadget {
+  color: transparent !important;
+  font-size: 0;
+}
